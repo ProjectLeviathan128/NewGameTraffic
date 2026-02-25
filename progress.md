@@ -28,3 +28,17 @@ Original prompt: i want portland to load immediatly when the app gets opened i w
   - made edge picking conditional (enabled only when an intervention tool is active), reducing constant picking overhead.
 - Updated `web/src/app/page.tsx` to clear stale selected edges when tool selection is cleared and to only pass `onEdgeClick` when a tool is active.
 - `npm run build` still passes after FPS changes.
+- Pushed FPS commit `dc43ed3` to `ProjectLeviathan128/NewGameTraffic` (`claude/gridlock-game-design-3a7CM`).
+- GitHub Pages deployment run `22418053673` succeeded and live audit screenshot confirms reduced default draw density at startup.
+- Live Pages re-audit before new changes confirmed deployed site still showed old banner: `Static mode — real Portland OSM + TriMet snapshot bundled for GitHub Pages.`
+- Added `scripts/enrich_portland_with_osm_buildings.py` to fetch sampled real OSM building footprints (Overpass tiled queries), bundle low-detail building meshes, and annotate each edge with `building_hits` + `land_acquisition_pc` for demolition-aware road economics.
+- Re-baked `web/public/data/portland_real_osm.json` with:
+  - PBOT traffic counts already applied (`traffic_calibration_mode: pbot_counts_plus_inference`)
+  - OSM buildings bundled (`records_kept: 22158`, raw fetched `22158`)
+  - edge land-use fields (`building_hits`, `land_acquisition_pc`) for all edges.
+- Updated static demo UX copy in `web/src/app/page.tsx` banner to explicitly state: real Portland OSM + PBOT traffic + OSM building meshes + demolition-aware costs.
+- Hardened static data loading in `web/src/lib/demo.ts` by trying multiple candidate JSON URLs (`${BASE_PATH}/data/...`, `/data/...`, relative `data/...`) before fallback, preventing accidental synthetic fallback when base-path env differs.
+- Maintained campaign-mode mechanics already present (district unlocks, road-edit preview costs, capacity upgrade + demolition economics) while feeding them from the enriched real dataset.
+- Kept static/demo simulation path deterministic in `web/src/hooks/useSimulation.ts` (`IS_DEMO = true`) so no backend command is required for GitHub Pages usage.
+- Build validation: `npm run build` passes after all edits.
+- Local Playwright validation confirms cold-start real bundle load with expected pilot-district counts from real data (`Unlocked: 3,979 roads · 1,422 buildings`) and updated banner text.

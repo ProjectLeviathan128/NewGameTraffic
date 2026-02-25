@@ -6,7 +6,8 @@ import { createWebSocket } from "@/lib/api";
 import { buildDemoSnapshot, ensureDemoCityLoaded } from "@/lib/demo";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-const IS_DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+// GitHub Pages MVP runs static/demo simulation only.
+const IS_DEMO = true;
 
 export function useSimulation(city: string) {
   const [snapshot, setSnapshot] = useState<SimSnapshot | null>(null);
@@ -15,6 +16,22 @@ export function useSimulation(city: string) {
   const wsRef = useRef<WebSocket | null>(null);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const hourRef = useRef(8);
+  const virtualMsRef = useRef(0);
+
+  const refreshDemoSnapshot = () => {
+    if (!IS_DEMO) return;
+    setSnapshot(buildDemoSnapshot(hourRef.current));
+  };
+
+  const advanceDemoTime = (ms: number) => {
+    if (!IS_DEMO) return;
+    virtualMsRef.current += Math.max(0, ms);
+    const hours = Math.floor(virtualMsRef.current / 1000);
+    if (hours <= 0) return;
+    virtualMsRef.current -= hours * 1000;
+    hourRef.current = (hourRef.current + hours) % 24;
+    setSnapshot(buildDemoSnapshot(hourRef.current));
+  };
 
   useEffect(() => {
     if (!city) return;
@@ -107,5 +124,5 @@ export function useSimulation(city: string) {
     };
   }, [city]);
 
-  return { snapshot, connected, error };
+  return { snapshot, connected, error, refreshDemoSnapshot, advanceDemoTime };
 }
