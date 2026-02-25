@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import Map from "react-map-gl/maplibre";
 import DeckGL from "@deck.gl/react";
-import { PathLayer, ScatterplotLayer, PolygonLayer, HeatmapLayer } from "@deck.gl/layers";
+import { PathLayer } from "@deck.gl/layers";
+import { HeatmapLayer } from "@deck.gl/aggregation-layers";
 import { EdgeState, RouteState, OverlayMode } from "@/types/simulation";
 import { vcToColor } from "@/lib/colors";
 
@@ -101,10 +102,10 @@ export default function CityMap({
   return (
     <DeckGL
       viewState={viewState}
-      onViewStateChange={({ viewState: vs }: { viewState: typeof viewState }) => setViewState(vs as typeof viewState)}
+      onViewStateChange={({ viewState: vs }) => setViewState(vs as typeof viewState)}
       controller={true}
       layers={layers}
-      style={{ position: "absolute", inset: 0 }}
+      style={{ position: "absolute", inset: "0" }}
     >
       <Map
         mapStyle="https://demotiles.maplibre.org/style.json"

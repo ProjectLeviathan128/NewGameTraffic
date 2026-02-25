@@ -2,10 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main, claude/gridlock-game-design-3a7CM]
-    paths:
-      - "web/**"
-      - ".github/workflows/deploy-pages.yml"
+    branches: [claude/gridlock-game-design-3a7CM, main, master]
   workflow_dispatch:
 
 permissions:
@@ -24,6 +21,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Configure GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -37,12 +38,16 @@ jobs:
       - name: Build static export
         working-directory: web
         env:
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
           # Demo mode: use synthetic city data instead of requiring live API
           NEXT_PUBLIC_DEMO_MODE: "true"
           NEXT_PUBLIC_DEFAULT_CITY: "portland"
           # Point to a deployed backend if you have one, otherwise demo mode takes over
           NEXT_PUBLIC_API_URL: ${{ vars.GRIDLOCK_API_URL || 'http://localhost:8000' }}
         run: npm run build
+
+      - name: Add .nojekyll
+        run: touch web/out/.nojekyll
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

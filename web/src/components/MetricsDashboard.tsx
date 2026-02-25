@@ -9,7 +9,15 @@ interface Props {
   cityName: string;
 }
 
-const METRIC_ROWS = [
+type MetricRow = {
+  key: keyof CityMetrics;
+  label: string;
+  unit: string;
+  target: number | null;
+  lower: boolean;
+};
+
+const METRIC_ROWS: MetricRow[] = [
   { key: "avg_commute_min",      label: "Avg Commute",    unit: "min",    target: 27,  lower: true },
   { key: "vmt_daily",            label: "Daily VMT",      unit: "km",     target: null, lower: true },
   { key: "transit_ridership",    label: "Transit Rides",  unit: "/day",   target: null, lower: false },
@@ -39,7 +47,7 @@ export default function MetricsDashboard({ metrics, tickHour, cityName }: Props)
       <table className="metrics-table">
         <tbody>
           {METRIC_ROWS.map(({ key, label, unit, target, lower }) => {
-            const val = (metrics as Record<string, number>)[key] ?? 0;
+            const val = metrics[key] ?? 0;
             const good = target
               ? (lower ? val <= target * 1.05 : val >= target * 0.95)
               : null;
