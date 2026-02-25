@@ -7,11 +7,17 @@ import MetricsDashboard from "@/components/MetricsDashboard";
 import HUD from "@/components/HUD";
 import ToolPalette from "@/components/ToolPalette";
 import { OverlayMode, InterventionTool } from "@/types/simulation";
+import {
+  demoApplyBusLane,
+  demoBoostFrequency,
+  demoApplyCongestionPricing,
+} from "@/lib/demo";
 
 // CityMap uses WebGL — must be client-only, no SSR
 const CityMap = dynamic(() => import("@/components/CityMap"), { ssr: false });
 
 const DEFAULT_CITY = process.env.NEXT_PUBLIC_DEFAULT_CITY ?? "portland";
+const IS_DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
 export default function GridlockApp() {
   const { snapshot, connected, error } = useSimulation(DEFAULT_CITY);
@@ -29,8 +35,30 @@ export default function GridlockApp() {
     setTimeout(() => setNotification(null), 4000);
   };
 
+  // In demo mode, intercept interventions and apply them client-side
+  const handleDemoIntervention = (tool: InterventionTool, edgeId: number | null) => {
+    if (!IS_DEMO || edgeId === null) return;
+    let result: { success: boolean; message: string; pc_cost: number };
+    if (tool === "bus_lane") {
+      result = demoApplyBusLane(edgeId);
+    } else if (tool === "congestion_pricing") {
+      result = demoApplyCongestionPricing([edgeId], 5.0);
+    } else {
+      result = { success: false, message: "Use the full server for this intervention", pc_cost: 0 };
+    }
+    handleIntervention(result);
+  };
+
   return (
     <main className="gridlock-main">
+      {/* Demo mode banner */}
+      {IS_DEMO && (
+        <div className="demo-banner">
+          Demo mode — synthetic Portland grid. Run{" "}
+          <code>gridlock serve portland</code> locally for real OSM data.
+        </div>
+      )}
+
       {/* Top HUD bar */}
       <HUD
         cityName="Portland, OR"
@@ -40,7 +68,7 @@ export default function GridlockApp() {
       />
 
       {/* 3D city map — full screen */}
-      <div className="map-container">
+      <div className={`map-container${IS_DEMO ? " has-demo-banner" : ""}`}>
         {error ? (
           <div className="error-overlay">
             <h2>Connection Error</h2>
@@ -53,7 +81,10 @@ export default function GridlockApp() {
             edges={snapshot?.edges ?? []}
             routes={snapshot?.routes ?? []}
             overlayMode={overlayMode}
-            onEdgeClick={setSelectedEdgeId}
+            onEdgeClick={IS_DEMO
+              ? (id) => { setSelectedEdgeId(id); handleDemoIntervention(activeTool, id); }
+              : setSelectedEdgeId
+            }
           />
         )}
       </div>
