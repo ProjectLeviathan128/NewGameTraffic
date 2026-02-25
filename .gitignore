@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+.venv/
+venv/
+env/
+.env
+
+# Data directories (large files, not committed)
+data/raw/
+data/processed/
+data/output/
+output/
+!data/.gitkeep
+!output/.gitkeep
+
+# Test/coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node / web
+web/node_modules/
+web/.next/
+web/.env.local
+web/.env*.local
+
+# City packages (large binary files, generate locally)
+*.gdlk

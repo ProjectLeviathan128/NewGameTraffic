@@ -1,0 +1,19 @@
+name: Portland, OR
+slug: portland
+bbox:
+  south: 45.432
+  west: -122.836
+  north: 45.653
+  east: -122.472
+crs_epsg: 32610           # UTM Zone 10N (meters) — covers Oregon
+gtfs_url: "https://developer.trimet.org/gtfs/google_transit.zip"
+census_year: 2020
+census_state_fips: "41"
+census_county_fips:
+  - "051"                 # Multnomah County
+  - "067"                 # Washington County
+  - "005"                 # Clackamas County
+npmrds_file: null         # Set to path of NPMRDS CSV if available
+validation:
+  target_vmt_daily: 12500000
+  target_transit_ridership_daily: 320000

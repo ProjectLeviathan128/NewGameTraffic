@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gridlock-pipeline"
+version = "0.1.0"
+description = "Gridlock: real-world city transit simulation — data pipeline and simulation engine"
+requires-python = ">=3.11"
+dependencies = [
+    # Core geospatial
+    "osmnx>=1.9.0",
+    "geopandas>=0.14.0",
+    "networkx>=3.2.0",
+    "pandas>=2.1.0",
+    "shapely>=2.0.0",
+    "pyproj>=3.6.0",
+    "numpy>=1.26.0",
+    # Framework substitutions (replace custom implementations)
+    "aequilibrae>=0.9.0",
+    "gtfs2nx>=0.2.0",
+    "uxsim>=1.0.0",
+    "pandana>=0.6.0",
+    "urbanaccess>=0.2.0",
+    # CLI and I/O
+    "click>=8.1.0",
+    "tqdm>=4.66.0",
+    "pyyaml>=6.0",
+    "requests>=2.31.0",
+    "msgpack>=1.0.7",
+    # Simulation server
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.27.0",
+    "websockets>=12.0",
+    # Utilities
+    "scipy>=1.12.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.23.0",
+]
+
+[project.scripts]
+gridlock = "gridlock.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["gridlock*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "integration: marks tests as integration tests requiring network/data downloads",
+]
