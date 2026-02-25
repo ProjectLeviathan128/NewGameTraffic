@@ -205,18 +205,20 @@ export default function CityMap({
   const visibleEdges: EdgeGeoFeature[] = useMemo(() => {
     if (zoomBucket === "near") return edgeFeatures;
     if (zoomBucket === "mid") {
-      return edgeFeatures.filter((e) => e.tier <= 1);
+      return edgeFeatures.filter((e) => e.tier <= 1 || (e.tier === 2 && e.edge_id % 6 === 0));
     }
-    return edgeFeatures.filter((e) => e.tier === 0 || (e.tier === 1 && e.edge_id % 2 === 0));
+    return edgeFeatures.filter((e) => e.tier === 0 || (e.tier === 1 && e.edge_id % 4 === 0));
   }, [edgeFeatures, zoomBucket]);
 
   const visibleBuildings: BuildingFeature[] = useMemo(() => {
     if (!buildingFeatures.length) return [];
     if (zoomBucket === "near") {
-      return buildingFeatures.filter((b) => b.tier === 0 || (b.tier === 1 && b.id % 2 === 0) || (b.tier === 2 && b.id % 3 === 0));
+      return buildingFeatures.filter(
+        (b) => b.tier === 0 || (b.tier === 1 && b.id % 2 === 0) || (b.tier === 2 && b.id % 4 === 0),
+      );
     }
     if (zoomBucket === "mid") {
-      return buildingFeatures.filter((b) => b.tier === 0 || (b.tier === 1 && b.id % 2 === 0) || (b.tier === 2 && b.id % 5 === 0));
+      return buildingFeatures.filter((b) => b.tier === 0 || (b.tier === 1 && b.id % 4 === 0));
     }
     return [];
   }, [buildingFeatures, zoomBucket]);
@@ -292,7 +294,10 @@ export default function CityMap({
         id: "road-base",
         data: visibleEdges,
         getPath: (d: EdgeGeoFeature) => d.path,
-        getColor: (d: EdgeGeoFeature) => roadBaseColor(d.highway_type, d.tier),
+        getColor: (d: EdgeGeoFeature) => {
+          if (overlayMode === "congestion") return vcToColor(d.vc);
+          return roadBaseColor(d.highway_type, d.tier);
+        },
         getWidth: (d: EdgeGeoFeature) => {
           if (d.tier === 0) return Math.max(6, d.lanes * 2.3);
           if (d.tier === 1) return Math.max(4, d.lanes * 1.8);
@@ -301,12 +306,12 @@ export default function CityMap({
         widthUnits: "pixels",
         pickable: enablePicking,
       }),
-    [visibleEdges, enablePicking],
+    [visibleEdges, enablePicking, overlayMode],
   );
 
-  const laneMarkingLayer = useMemo(
-    () =>
-      new PathLayer({
+  const laneMarkingLayer = useMemo(() => {
+    if (zoomBucket !== "near" || visibleEdges.length > 5_000) return null;
+    return new PathLayer({
         id: "road-markings",
         data: visibleEdges,
         getPath: (d: EdgeGeoFeature) => d.path,
@@ -314,23 +319,8 @@ export default function CityMap({
         getWidth: (d: EdgeGeoFeature) => (d.tier === 0 ? 1.6 : 1.0),
         widthUnits: "pixels",
         pickable: false,
-      }),
-    [visibleEdges],
-  );
-
-  const congestionOverlayLayer = useMemo(() => {
-    if (overlayMode !== "congestion") return null;
-    return new PathLayer({
-      id: "congestion-overlay",
-      data: visibleEdges,
-      getPath: (d: EdgeGeoFeature) => d.path,
-      getColor: (d: EdgeGeoFeature) => vcToColor(d.vc),
-      getWidth: (d: EdgeGeoFeature) => (d.tier === 0 ? 3.2 : d.tier === 1 ? 2.4 : 1.8),
-      widthUnits: "pixels",
-      opacity: 0.78,
-      pickable: false,
     });
-  }, [visibleEdges, overlayMode]);
+  }, [visibleEdges, zoomBucket]);
 
   const selectedEdgeLayer = useMemo(() => {
     if (!selectedEdgeFeature) return null;
@@ -378,19 +368,22 @@ export default function CityMap({
         if (d.tier === 1) return [122, 138, 146, 106];
         return [104, 120, 128, 84];
       },
-      opacity: 0.68,
+      opacity: 0.62,
       pickable: false,
     });
   }, [visibleBuildings, zoomBucket, conflictSet]);
 
+  const useDevicePixels = typeof window === "undefined" ? 1 : Math.min(1.25, window.devicePixelRatio || 1);
+
   const layers = useMemo(
-    () => [buildingLayer, roadBaseLayer, laneMarkingLayer, congestionOverlayLayer, selectedEdgeLayer, handleLayer].filter(Boolean),
-    [buildingLayer, roadBaseLayer, laneMarkingLayer, congestionOverlayLayer, selectedEdgeLayer, handleLayer],
+    () => [buildingLayer, roadBaseLayer, laneMarkingLayer, selectedEdgeLayer, handleLayer].filter(Boolean),
+    [buildingLayer, roadBaseLayer, laneMarkingLayer, selectedEdgeLayer, handleLayer],
   );
 
   return (
     <DeckGL
       initialViewState={initialViewState}
+      useDevicePixels={useDevicePixels}
       onViewStateChange={handleViewStateChange}
       onClick={handleDeckClick}
       onDragStart={onDragStart as (info: unknown) => void}
