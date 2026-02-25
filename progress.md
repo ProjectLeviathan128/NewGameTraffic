@@ -18,3 +18,13 @@ Original prompt: i want portland to load immediatly when the app gets opened i w
 - Verified `npm run build` succeeds after all changes.
 - Local browser artifacts now show real Portland road geometry rendered on startup in static mode (`output/web-game-real/shot-0.png`, `output/web-game-real-headed/shot-0.png`).
 - Residual issue still present in automated Playwright runs: deck.gl/luma page error `maxTextureDimension2D` in this automation environment, plus a `/favicon.ico` 404 in local dev if icon file is missing at root.
+- Pushed commit `b477bab` to `ProjectLeviathan128/NewGameTraffic` branch `claude/gridlock-game-design-3a7CM`.
+- GitHub Pages deployment run `22417706404` completed successfully.
+- Post-deploy live audit confirms static real-data mode banner and real Portland road geometry at `https://projectleviathan128.github.io/NewGameTraffic/`.
+- FPS optimization pass:
+  - switched `CityMap` to uncontrolled camera mode (`initialViewState`) and removed per-frame React state updates on every pan/zoom frame;
+  - added zoom-based LOD filtering (far/mid/near buckets) to reduce rendered edge count from ~41k to arterial subsets at startup;
+  - added sampled heatmap inputs at lower zoom and disabled heatmap entirely in far zoom;
+  - made edge picking conditional (enabled only when an intervention tool is active), reducing constant picking overhead.
+- Updated `web/src/app/page.tsx` to clear stale selected edges when tool selection is cleared and to only pass `onEdgeClick` when a tool is active.
+- `npm run build` still passes after FPS changes.

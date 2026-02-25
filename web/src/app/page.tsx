@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useSimulation } from "@/hooks/useSimulation";
 import MetricsDashboard from "@/components/MetricsDashboard";
@@ -25,6 +25,12 @@ export default function GridlockApp() {
   const [activeTool, setActiveTool] = useState<InterventionTool>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<number | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (activeTool === null) {
+      setSelectedEdgeId(null);
+    }
+  }, [activeTool]);
 
   const handleIntervention = (result: { success: boolean; message: string; pc_cost: number }) => {
     setNotification(
@@ -80,9 +86,15 @@ export default function GridlockApp() {
             edges={snapshot?.edges ?? []}
             routes={snapshot?.routes ?? []}
             overlayMode={overlayMode}
-            onEdgeClick={IS_DEMO
-              ? (id) => { setSelectedEdgeId(id); handleDemoIntervention(activeTool, id); }
-              : setSelectedEdgeId
+            onEdgeClick={
+              activeTool === null
+                ? undefined
+                : (IS_DEMO
+                    ? (id) => {
+                        setSelectedEdgeId(id);
+                        handleDemoIntervention(activeTool, id);
+                      }
+                    : setSelectedEdgeId)
             }
           />
         )}
