@@ -16,11 +16,11 @@ import {
 // CityMap uses WebGL — must be client-only, no SSR
 const CityMap = dynamic(() => import("@/components/CityMap"), { ssr: false });
 
-const DEFAULT_CITY = process.env.NEXT_PUBLIC_DEFAULT_CITY ?? "portland";
+const STARTUP_CITY = "portland";
 const IS_DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
 export default function GridlockApp() {
-  const { snapshot, connected, error } = useSimulation(DEFAULT_CITY);
+  const { snapshot, connected, error } = useSimulation(STARTUP_CITY);
   const [overlayMode, setOverlayMode] = useState<OverlayMode>("congestion");
   const [activeTool, setActiveTool] = useState<InterventionTool>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<number | null>(null);
@@ -54,8 +54,7 @@ export default function GridlockApp() {
       {/* Demo mode banner */}
       {IS_DEMO && (
         <div className="demo-banner">
-          Demo mode — synthetic Portland grid. Run{" "}
-          <code>gridlock serve portland</code> locally for real OSM data.
+          Static mode — real Portland OSM + TriMet snapshot bundled for GitHub Pages.
         </div>
       )}
 
@@ -74,7 +73,7 @@ export default function GridlockApp() {
             <h2>Connection Error</h2>
             <p>{error}</p>
             <p>Make sure the Gridlock server is running:</p>
-            <code>gridlock serve {DEFAULT_CITY}</code>
+            <code>gridlock serve {STARTUP_CITY}</code>
           </div>
         ) : (
           <CityMap
@@ -116,7 +115,7 @@ export default function GridlockApp() {
           activeTool={activeTool}
           onSelectTool={setActiveTool}
           selectedEdgeId={selectedEdgeId}
-          city={DEFAULT_CITY}
+          city={STARTUP_CITY}
           onIntervention={handleIntervention}
         />
       </div>

@@ -39,7 +39,7 @@ jobs:
         working-directory: web
         env:
           NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
-          # Demo mode: use synthetic city data instead of requiring live API
+          # Static mode: use bundled Portland OSM/GTFS snapshot (no backend required).
           NEXT_PUBLIC_DEMO_MODE: "true"
           NEXT_PUBLIC_DEFAULT_CITY: "portland"
           # Point to a deployed backend if you have one, otherwise demo mode takes over

@@ -6,6 +6,10 @@ export interface EdgeState {
   los: "A" | "B" | "C" | "D" | "E" | "F";
   has_bus_lane: boolean;
   color: string;              // Hex color from server
+  // Optional geometry fields for static/demo-mode rendering on GitHub Pages.
+  path?: [number, number][];
+  midpoint?: [number, number];
+  highway_type?: string;
 }
 
 export interface RouteState {

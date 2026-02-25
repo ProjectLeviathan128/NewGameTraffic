@@ -6,7 +6,7 @@ bbox:
   north: 45.653
   east: -122.472
 crs_epsg: 32610           # UTM Zone 10N (meters) — covers Oregon
-gtfs_url: "https://developer.trimet.org/gtfs/google_transit.zip"
+gtfs_url: "https://developer.trimet.org/schedule/gtfs.zip"
 census_year: 2020
 census_state_fips: "41"
 census_county_fips:
